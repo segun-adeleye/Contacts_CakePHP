@@ -8,6 +8,7 @@ class ContactsController extends AppController {
 	public function index() {
 		$this->Contact->recursive = 0;
 		$this->set('contacts', $this->Paginator->paginate());
+		$this->set('title_for_layout', 'Contacts: Home');
 	}
 
 	public function view($id = null) {
@@ -15,13 +16,14 @@ class ContactsController extends AppController {
 			throw new NotFoundException(__('Invalid contact'));
 		}
 		$options = array('conditions' => array('Contact.' . $this->Contact->primaryKey => $id));
-		$this->set('contact', $this->Contact->find('first', $options));
+		$contact = $this->Contact->find('first', $options);
+		$this->set('contact', $contact);
+		$this->set('title_for_layout', 'Contact Details: '.$contact['Contact']['first_name'].' '.$contact['Contact']['last_name']);
 	}
 
 	public function add() {
 		if ($this->request->is('post')) {
 			$this->Contact->create();
-			//Added this line to get the logged in user_id
 			$this->request->data['Contact']['user_id'] = $this->Auth->user('id');
 			if ($this->Contact->save($this->request->data)) {
 				$this->Session->setFlash(__('The contact has been saved.'));
@@ -32,6 +34,7 @@ class ContactsController extends AppController {
 		}
 		$users = $this->Contact->User->find('list');
 		$this->set(compact('users'));
+		$this->set('title_for_layout', 'Add New Contact');
 	}
 
 	public function edit($id = null) {
@@ -47,10 +50,12 @@ class ContactsController extends AppController {
 			}
 		} else {
 			$options = array('conditions' => array('Contact.' . $this->Contact->primaryKey => $id));
-			$this->request->data = $this->Contact->find('first', $options);
+			$contact = $this->Contact->find('first', $options);
+			$this->request->data = $contact;
 		}
 		$users = $this->Contact->User->find('list');
 		$this->set(compact('users'));
+		$this->set('title_for_layout', 'Edit Contact: '.$contact['Contact']['first_name'].' '.$contact['Contact']['last_name']);
 	}
 
 	public function delete($id = null) {
