@@ -5,14 +5,15 @@ class UsersController extends AppController {
 
 	public $helpers = array('Html', 'Form', 'Session', 'Paginator');
 
-	public $components = array('Paginator', 'Session', 'Auth');
-	
 	public function beforeFilter() {
 		parent::beforeFilter();
 		$this->Auth->allow('logout', 'register');
 	}
 
+	public $components = array('Paginator', 'Session', 'Auth');
+
 	public function index() {
+		$this->set('title_for_layout', 'Registered Users');
 		$this->User->recursive = 0;
 		$this->set('users', $this->Paginator->paginate());
 	}
@@ -24,6 +25,7 @@ class UsersController extends AppController {
 			}
 			$this->Session->setFlash('Your username/password is incorrect.');
 		}
+		$this->set('title_for_layout', 'Contacts: Login');
 	}
 
 	public function logout() {
@@ -35,7 +37,9 @@ class UsersController extends AppController {
 			throw new NotFoundException(__('Invalid user'));
 		}
 		$options = array('conditions' => array('User.' . $this->User->primaryKey => $id));
-		$this->set('user', $this->User->find('first', $options));
+		$user = $this->User->find('first', $options);
+		$this->set('user', $user);
+		$this->set('title_for_layout', 'Profile: '.$user['User']['first_name'].' '.$user['User']['last_name']);
 	}
 
 	public function register() {
@@ -48,6 +52,7 @@ class UsersController extends AppController {
 				$this->Session->setFlash(__('The user could not be saved. Please, try again.'));
 			}
 		}
+		$this->set('title_for_layout', 'Contacts: Sign Up');
 	}
 
 	public function edit($id = null) {
@@ -63,7 +68,9 @@ class UsersController extends AppController {
 			}
 		} else {
 			$options = array('conditions' => array('User.' . $this->User->primaryKey => $id));
-			$this->request->data = $this->User->find('first', $options);
+			$user = $this->User->find('first', $options);
+			$this->request->data = $user;
+			$this->set('title_for_layout', 'Edit Profile: '.$user['User']['first_name'].' '.$user['User']['last_name']);
 		}
 	}
 
@@ -80,5 +87,4 @@ class UsersController extends AppController {
 		}
 		return $this->redirect(array('action' => 'index'));
 	}
-
 }
